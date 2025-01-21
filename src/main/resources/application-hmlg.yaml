@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: todo-high
+  datasource:
+    url: jdbc:postgresql://54.152.42.17:5432/postgres?currentSchema=todo_high
+    username: postgres
+    password: ${DB_PASSWORD:}
+  flyway:
+    default-schema: todo_high
+    url: jdbc:postgresql://54.152.42.17:5432/postgres
+    user: postgres
+    password: ${DB_PASSWORD:}
+    create-schemas: false
