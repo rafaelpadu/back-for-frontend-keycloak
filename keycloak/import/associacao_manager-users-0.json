@@ -1,0 +1,30 @@
+{
+  "realm" : "associacao_manager",
+  "users" : [ {
+    "id" : "da318907-2f62-47cb-9582-8a10fcbb4170",
+    "createdTimestamp" : 1737678590371,
+    "username" : "rafael_adm",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "Rafael",
+    "lastName" : "Del Corona",
+    "email" : "rafaelpadua07@gmail.com",
+    "credentials" : [ {
+      "id" : "d30bf8e9-450c-46c4-83ee-6127cbe5584d",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1740841435408,
+      "secretData" : "{\"value\":\"w1gEuxVub1O0Mro1aldK1osrN7DYqeR5iuqMlNQf/9RT86hNH2mXUza7crAVbX7sy12t2C8nSW6It/zFZ+NxtQ==\",\"salt\":\"dFdD+7t5c3YB8+WwV/f+3g==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-associacao manager", "admin" ],
+    "clientRoles" : {
+      "associacao-api" : [ "client_admin" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  } ]
+}

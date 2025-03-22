@@ -1,0 +1,110 @@
+scheme: http
+hostname: localhost
+reverse-proxy-port: 7080
+reverse-proxy-uri: ${scheme}://${hostname}:${reverse-proxy-port}
+authorization-server-prefix: /realms
+issuer: ${reverse-proxy-uri}${authorization-server-prefix}/associacao_manager
+client-id: associacao-api
+client-secret: secret
+username-claim-json-path: $.preferred_username
+authorities-json-path: $.realm_access.roles
+bff-port: 7081
+bff-prefix: /bff
+resource-server-port: 7084
+audience:
+
+com:
+  c4-soft:
+    springaddons:
+      oidc:
+        # Configuração de provedores OpenID confiáveis (com authorities mapping)
+        ops:
+          - iss: ${issuer}
+            authorities:
+              - path: ${authorities-json-path}
+            aud: ${audience}
+        # SecurityFilterChain com oauth2login() (sessions and CSRF protection enabled)
+        client:
+          client-uri: ${reverse-proxy-uri}${bff-prefix}
+          security-matchers:
+            - /api/**
+            - /login/**
+            - /oauth2/**
+            - /logout/**
+          permit-all:
+            - /api/**
+            - /login/**
+            - /oauth2/**
+            - /logout/connect/back-channel/associacao_manager
+          csrf: cookie_accessible_from_js
+          post-logout-redirect-host: ${hostname}
+          oauth2-redirections:
+            rp-initiated-logout: accepted
+          back-channel-logout:
+            enabled: true
+            internal-logout-uri: ${scheme}://${hostname}:${bff-port}/logout
+        # SecurityFilterChain with oauth2ResourceServer() (sessions and CSRF protection disabled)
+        resourceserver:
+          permit-all:
+            - /login-options
+            - /error
+            - /actuator/health/readiness
+            - /actuator/health/liveness
+
+spring:
+  application:
+    name: bff
+  security:
+    oauth2:
+      client:
+        provider:
+          associacao-manager:
+            issuer-uri: ${issuer}
+        registration:
+          associacao-manager:
+            provider: associacao-manager
+            authorization-grant-type: authorization_code
+            client-id: ${client-id}
+            client-secret: ${client-secret}
+            scope: openid,profile,email,offline_access
+  cloud:
+    gateway:
+      routes:
+        - id: auth-server
+          uri: ${scheme}://${hostname}:${resource-server-port}
+          predicates:
+            - Path=/api/**
+          filters:
+            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+#         parte mais importante:
+            - TokenRelay=
+            - SaveSession
+#            Retira o prefixo /api da URL, ou seja, uma req. enviada pelo front para /bff/api/me chega /me
+#            pois o reverse proxy já via tirar o /bff da frente, ficando um /api/me e depois o
+            - StripPrefix=1
+server:
+  port: ${bff-port}
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+logging:
+  level:
+    root: INFO
+    org:
+      springframework:
+        boot: INFO
+        security: TRACE
+        web: INFO

@@ -1,0 +1,28 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: url
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: password
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_ENABLED: true
+      KC_HEALTH_ENABLED: true
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:7080/health/ready" ]
+      interval: 15s
+      timeout: 2s
+      retries: 15
+    command: start-dev --optimized
+    ports:
+      - "8080:8080"
+    networks:
+      - keycloak_network
+    volumes:
+      - ../keycloak/themes:/opt/keycloak/providers/
+
+networks:
+  keycloak_network:
+    external: true

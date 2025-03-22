@@ -1,0 +1,70 @@
+scheme: http
+hostname: localhost
+reverse-proxy-port: 7080
+angular-port: 4201
+angular-prefix: /angular-ui
+angular-uri: ${scheme}://${hostname}:${angular-port}${angular-prefix}
+authorization-server-port: 8080
+authorization-server-prefix: /realms
+authorization-server-uri: ${scheme}://${hostname}:${authorization-server-port}${authorization-server-prefix}
+bff-port: 7081
+bff-prefix: /bff
+bff-uri: ${scheme}://${hostname}:${bff-port}
+
+server:
+  port: ${reverse-proxy-port}
+
+spring:
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      routes:
+        #SPA assets
+        - id: angular-ui
+          uri: ${angular-uri}
+          predicates:
+            - Path=${angular-prefix}/**
+        # Authorization-server
+        - id: authorization-server
+          uri: ${authorization-server-uri}
+          predicates:
+            - Path=${authorization-server-prefix}/**
+        # Keycloak resources
+        - id: keycloak-resources
+          uri: http://localhost:8080
+          predicates:
+            - Path=/resources/**
+          filters:
+            - StripPrefix=0
+        # BFF
+        - id: bff
+          uri: ${bff-uri}
+          predicates:
+            - Path=${bff-prefix}/**
+          filters:
+            - StripPrefix=1
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+logging:
+  level:
+    root: INFO
+    org:
+      springframework:
+        boot: INFO
+        web: INFO
+

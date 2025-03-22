@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: associacao_Back
+  datasource:
+    url: uri
+    username: postgres
+    password: ${DB_PASSWORD:}
+  flyway:
+    default-schema: todo_high
+    url: uri
+    user: postgres
+    password: ${DB_PASSWORD:}
+    create-schemas: false
